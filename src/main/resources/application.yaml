@@ -1,0 +1,72 @@
+spring:
+  mvc:
+    async:
+      request-timeout: 120000
+  application:
+    name: demo
+  config:
+    import: optional:file:.env[.properties]
+
+  ai:
+    model:
+      chat: openai
+      embedding: transformers      # important, see below
+    openai:
+      api-key: ${LLM_API_KEY}
+      base-url: https://api.groq.com/openai/v1
+      chat:
+        model: openai/gpt-oss-120b
+        temperature: 0.2
+    vectorstore:
+      pgvector:
+        initialize-schema: true
+        dimensions: 384
+        distance-type: COSINE_DISTANCE
+        index-type: HNSW
+
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=require
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: HikariCP
+      maximum-pool-size: 3
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope: read:user,repo
+
+app:
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5173}
+  token-encryption-key: ${TOKEN_ENCRYPTION_KEY}
+  token-encryptor-password: ${TOKEN_EXCRYPTER}
+
+server:
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        name: codereaper_session
+        same-site: ${COOKIE_SAMESITE:lax}
+        secure: ${COOKIE_SECURE:false}
+
+logging:
+  level:
+    org.springframework.security: INFO
